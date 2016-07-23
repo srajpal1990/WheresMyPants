@@ -1,0 +1,296 @@
+<html>
+<head>
+	<link href='https://fonts.googleapis.com/css?family=Dawning+of+a+New+Day' rel='stylesheet' type='text/css'>	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	
+	<link rel="stylesheet" type="text/css" href="/css/findMyPants.css">
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<title><%=title%></title>
+</head>
+<body>
+	<div id="nav">
+		<a href="/">
+			<img id="pantsInJail" src="/images/pantsInJail.png">
+
+		</a>	</div>
+		<div id="content">
+			<div class="center">
+
+				<h1>Mystic Pants Finder</h1>
+				<div id="led">
+					<div id="bit7" type="div" class="bitbtn circle"></div>
+					<div id="bit6" type="div" class="bitbtn circle"></div>
+					<div id="bit5" type="div" class="bitbtn circle"></div>
+					<div id="bit4" type="div" class="bitbtn circle"></div>
+					<div id="bit3" type="div" class="bitbtn circle"></div>
+					<div id="bit2" type="div" class="bitbtn circle"></div>
+					<div id="bit1" type="div" class="bitbtn circle"></div>
+					<div id="bit0" type="div" class="bitbtn circle"></div>
+				</div>
+				<div class="btn-group">
+					<button id="updateLocBtn" class="btn paper paper-raise">Update Location</button>
+					<button id="cheatBtn" class="btn paper paper-raise" data-toggle="modal" data-target="#myModal">Cheat</button>
+				</div>
+				<div id="myModal" class="modal fade" role="dialog">
+					<div class="modal-dialog">
+
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<h4 class="modal-title">Cheat</h4>
+							</div>
+							<div class="modal-body">
+								<div id="map"></div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+
+			<div>
+				<table id="note"><tbody><tr><td>
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/c.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/p.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<br clear="all">
+					<img src="http://contactsheet.org/images/ransom/f.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/d.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/b.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/v.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/p.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all">
+					<img src="http://contactsheet.org/images/ransom/d.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/c.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/d.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/d.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/c.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/f.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/w.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/colon.gif" width="35" height="40">
+					<br clear="all"><br>
+					<br clear="all"><br>
+					<img src="http://contactsheet.org/images/ransom/w.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+
+					<img src="http://contactsheet.org/images/ransom/g.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/g.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/b.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/c.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><img src="http://contactsheet.org/images/ransom/v.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/b.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/g.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><img src="http://contactsheet.org/images/ransom/p.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/period.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><br>
+					<img src="http://contactsheet.org/images/ransom/w.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/l.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/d.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><img src="http://contactsheet.org/images/ransom/m.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/y.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/i.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/c.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/p.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/s.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/a.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/f.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/u.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<br clear="all"><img src="http://contactsheet.org/images/ransom/t.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/h.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/n.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/space.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/b.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/f.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/o.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/r.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/e.gif" width="35" height="40">
+					<img src="http://contactsheet.org/images/ransom/exclamation.gif" width="35" height="40">
+				</td></tr></tbody></table>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="/js/exam1.js"></script>
+	
+     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5VIaEP1zrdlpM1MZJiZxqPcM-MR5cCgQ&callback=initMap"
+    async defer></script>
+	
+</body>
+
+</html>
+

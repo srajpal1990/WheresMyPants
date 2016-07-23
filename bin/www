@@ -1,0 +1,217 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+ var app = require('../app');
+ var debug = require('debug')('WheresMyPants:server');
+ var http = require('http');
+ var mongo=require('mongodb');
+
+ var COLLECTION_NAME="userSockets";
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+ var port = normalizePort(process.env.PORT || '3000');
+ app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+ var server = http.createServer(app);
+ var io=require('socket.io')(server);
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+ server.listen(port);
+ server.on('error', onError);
+ server.on('listening', onListening);
+ io.on('connection', function (socket){
+  console.log("a user connected");
+  
+
+  mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
+    if(err){
+      console.warn(err.message);
+    } else {
+      var usersCollection = db.collection(COLLECTION_NAME);
+
+      console.log("inserting user");
+      usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null}, function (err, o) {
+        if (err) { console.warn(err.message); }
+        
+
+      });
+    }
+  });
+  socket.on('disconnect',function(){
+    console.log("user disconnected");
+    mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
+      var usersCollection = db.collection(COLLECTION_NAME);
+      usersCollection.remove({socketId:socket.id});
+    });
+  });
+
+  socket.on('updateLocation',function(locDetails){
+    console.log("update location event");
+    mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
+      if(err){
+        console.warn(err.message);
+      } else {
+        var usersCollection = db.collection(COLLECTION_NAME);
+        var user=usersCollection.findOne({socketId:socket.id},function(err,user){
+          if(err){
+            console.warn(err.message);
+          }else{
+            if(user.pantsLat==null||user.pantsLon==null||user.origDist==null){
+              hidePants(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
+            }else{
+              if(user==null){
+                console.log("user was null");
+              }else{
+                console.log("user not null");
+              }
+              updateLed(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
+            }
+          }
+        });
+        
+      }
+    });
+
+  });
+
+
+});
+
+function hidePants(lon,lat,numLedActive,user,socket){
+
+  var pantsLon=lon+Math.random()/100;
+  var pantsLat=lat+Math.random()/100;
+  var pantLocation={
+    lat:pantsLat,
+    lng:pantsLon
+  };
+  socket.emit("pantLoc",pantLocation);
+  calcDist(pantsLat,pantsLon,lat,lon,function(dist){
+    mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
+      if(err){
+        console.warn(err.message);
+      } else {
+        var usersCollection = db.collection(COLLECTION_NAME);
+        user.pantsLat=pantsLat;
+        user.pantsLon=pantsLon;
+        user.origDist=dist;
+        console.log(user);
+        usersCollection.save(user,function(err,userDoc){
+          if(err){
+            console.warn(err.message);
+          }else{
+            console.log("user updated");
+          }
+        });
+        socket.emit('updateLed',4);
+      }
+    });
+  });
+  
+
+}
+
+function calcDist(lat1,lon1,lat2,lon2,callback){
+
+
+var R = 6371; // km 
+//has a problem with the .toRad() method below.
+var x1 = lat2-lat1;
+var dLat = toRad(x1);
+var x2 = lon2-lon1;
+var dLon = toRad(x2);
+var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+Math.sin(dLon/2) * Math.sin(dLon/2);  
+var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+var d = R * c; 
+
+callback(d);
+}
+
+function toRad(Value) {
+  /** Converts numeric degrees to radians */
+  return Value * Math.PI / 180;
+}
+
+function updateLed(lon,lat,numLedActive,user,socket){
+  var origDist=user.origDist;
+  console.log("orig dist "+origDist);
+  calcDist(lat,lon,user.pantsLat,user.pantsLon,function(dist){
+    var newDist=dist;
+    var updatedLedCount=Math.round((newDist/origDist)*4);
+    console.log("new dist "+newDist+" orig dist "+origDist);
+    console.log(updatedLedCount);
+    socket.emit('updateLed',updatedLedCount);
+  });
+}
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+ function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+ function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+  ? 'Pipe ' + port
+  : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+    console.error(bind + ' requires elevated privileges');
+    process.exit(1);
+    break;
+    case 'EADDRINUSE':
+    console.error(bind + ' is already in use');
+    process.exit(1);
+    break;
+    default:
+    throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+ function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+  ? 'pipe ' + addr
+  : 'port ' + addr.port;
+  console.log('Listening on ' + bind);
+}
