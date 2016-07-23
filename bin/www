@@ -110,10 +110,10 @@ function initializeEventListeners(socket){
           }else{
             //If pants have not been hidden hide them.
             if(user.pantsLat==null||user.pantsLon==null||user.origDist==null){
-              hidePants(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
+              hidePants(locDetails.lng,locDetails.lat,locDetails.numLedActive,user,socket);
             }else{
             //else calc update LED config
-            updateLed(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
+            updateLed(locDetails.lng,locDetails.lat,locDetails.numLedActive,user,socket);
           }
         }
       });

@@ -37,6 +37,8 @@ function init(){
 
 	//Initialize Google Maps when modal cheat window is shown.
 	$('#myModal').on("shown.bs.modal", function () {
+
+		//get the base url to access server stored icons for markers.
 		var curDomain=getCurDomain();
 
 		//Initialize map centered on users location.
@@ -63,7 +65,7 @@ function init(){
 		});
 
 		//Listen for drag end event on user marker (Used to fake the users position)
-		google.maps.event.addListener(marker, "dragend", function(event) { 
+		google.maps.event.addListener(userMarker, "dragend", function(event) {
 			userLocDetails={
 				lng:event.latLng.lng(),
 				lat:event.latLng.lat(),
@@ -94,8 +96,8 @@ function init(){
 		});
 
 		//When user is close to pants location redirect to found pants page.
-		if(updatedLedCount==0){
-			window.location.href="/foundPants"
+		if(updatedLedCount===0){
+			window.location.href="/foundPants";
 		}
 
 	});
@@ -107,7 +109,7 @@ function init(){
 
 /**
 *Requests user browser for access to location details
-**/ 
+**/
 function getLocation() {
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(useLocation);
@@ -121,7 +123,7 @@ function getLocation() {
 *function will return http://localhost:3000.
 **/
 function getCurDomain(){
-	var url = window.location.href
+	var url = window.location.href;
 	var arr = url.split("/");
 	var baseDomain = arr[0] + "//" + arr[2];
 	return baseDomain;
@@ -144,30 +146,33 @@ function useLocation(position) {
 // Display a bit on the LED display
 function setBit(bit, on) {
 	if (on) {
-		$("#bit" + bit).css("background-color", "Red");		
+		$("#bit"+bit).css("background-color","Red");
 	} else {
-		$("#bit" + bit).css("background-color", "LimeGreen");		
+		$("#bit"+bit).css("background-color","LimeGreen");
 	}
 }
 
 // Display a byte on the LED display
 function displayChar(ch) {
 		// console.log("Key: " + String.fromCharCode(ch) + "[" + ch + "]");
-		setBit(7, (ch & 0x80) > 0)
-		setBit(6, (ch & 0x40) > 0)
-		setBit(5, (ch & 0x20) > 0)
-		setBit(4, (ch & 0x10) > 0)
-		setBit(3, (ch & 0x08) > 0)
-		setBit(2, (ch & 0x04) > 0)
-		setBit(1, (ch & 0x02) > 0)
-		setBit(0, (ch & 0x01) > 0)
+		setBit(7, (ch & 0x80) > 0);
+		setBit(6, (ch & 0x40) > 0);
+		setBit(5, (ch & 0x20) > 0);
+		setBit(4, (ch & 0x10) > 0);
+		setBit(3, (ch & 0x08) > 0);
+		setBit(2, (ch & 0x04) > 0);
+		setBit(1, (ch & 0x02) > 0);
+		setBit(0, (ch & 0x01) > 0);
 	}
 
 // Clears the display back to grey
 function clearDisplay() {
-	$(".bitbtn").css("background-color", "LightGray");		
+	$(".bitbtn").css("background-color","LightGray");
 }
 
+
+
+});
 
 /**
 *Initialize google map.
