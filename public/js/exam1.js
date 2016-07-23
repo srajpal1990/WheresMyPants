@@ -1,125 +1,157 @@
 $(function() {
-	var socket = io();
+//Set up variables
+var socket;
+var userLocDetails;
+var pantLocDetails;
+var map;
 
-	init();
-	var userLocDetails;
-	var pantLocDetails;
 
-	function init(){
+//Initialize
+init();
 
-		var bitCount=0;
-		$('#led').children().each(function () {
-			setBit(bitCount,true);
-			bitCount++;
-		});
 
-		$('#updateLocBtn').click(function(){
-			console.log("update loc btn click");
-			getLocation();
-		});
+/**FUCNTIONS**/
 
-		$('#myModal').on("shown.bs.modal", function () {
-			var pos = {
-				lat: userLocDetails.lat,
-				lng:userLocDetails.lon
-			};
+/**
+*Initialize variables and UI
+**/
+function init(){
+	//Connect to socket
+	socket = io();
 
-			var pos2 = {
-				lat: userLocDetails.lat+0.005,
-				lng:userLocDetails.lon
-			};
-
-			map = new google.maps.Map(document.getElementById('map'), {
-				center: pos2,
-				zoom: 14
-			});
-			var url = window.location.href
-			var arr = url.split("/");
-			var result = arr[0] + "//" + arr[2]
-			console.log();
-
-			var marker = new google.maps.Marker({
-				position: pos,
-				map: map,
-				draggable:true,
-				icon:result+"/images/user.png"
-
-			});
-
-			var marker2 = new google.maps.Marker({
-				position: pantLocDetails,
-				map: map,
-				icon:result+"/images/pantsInJailSmall.png"
-
-			});
-
-			google.maps.event.addListener(marker, "dragend", function(event) { 
-				console.log("drag end");
-				userLocDetails={
-					lon:event.latLng.lng(),
-					lat:event.latLng.lat(),
-					numLedActive:0
-				};
-				socket.emit('updateLocation',userLocDetails);
-				 
-			});
-			
-
-			
-		})
-
-socket.on('pantLoc',function(pantLoc){
-	console.log(pantLoc);
-	pantLocDetails=pantLoc;
-});
-
-socket.on('updateLed',function(updatedLedCount){
-	clearDisplay();
-	bitCount=0;
-	console.log("updateLed count "+updatedLedCount);
+	//Initialize LED config to all red
+	var bitCount=0;
 	$('#led').children().each(function () {
-		setBit(bitCount,bitCount<updatedLedCount);
+		setBit(bitCount,true);
 		bitCount++;
 	});
 
-	if(updatedLedCount==0){
-		window.location.href="/foundPants"
-	}
 
-});
+	/**SET UP LISTENERS**/
 
-getLocation();
+	//Get location from browser 
+	$('#updateLocBtn').click(function(){
+		console.log("update loc btn click");
+		getLocation();
+	});
+
+	//Initialize Google Maps when modal cheat window is shown.
+	$('#myModal').on("shown.bs.modal", function () {
+		var curDomain=getCurDomain();
+
+		//Initialize map centered on users location.
+		var map = new google.maps.Map(document.getElementById('map'), {
+			center: userLocDetails,
+			zoom: 14
+		});
+
+		//Show user marker on map.
+		var userMarker = new google.maps.Marker({
+			position: userLocDetails,
+			map: map,
+			draggable:true,
+			icon:curDomain+"/images/user.png"
+
+		});
+
+		//Show pants marker on map.
+		var pantsMarker = new google.maps.Marker({
+			position: pantLocDetails,
+			map: map,
+			icon:curDomain+"/images/pantsInJailSmall.png"
+
+		});
+
+		//Listen for drag end event on user marker (Used to fake the users position)
+		google.maps.event.addListener(marker, "dragend", function(event) { 
+			userLocDetails={
+				lng:event.latLng.lng(),
+				lat:event.latLng.lat(),
+			};
+
+			//Request LED config update based on fake location update details recieved.
+			socket.emit('updateLocation',userLocDetails);
+
+		});
+
+
+
+	});
+
+	//Recieve and save the location of the pants to allow cheating.
+	socket.on('pantLoc',function(pantLoc){
+		pantLocDetails=pantLoc;
+	});
+
+	//Recieve updated LED config and update UI
+	socket.on('updateLed',function(updatedLedCount){
+		clearDisplay();//Clear current LED config
+
+		bitCount=0;
+		$('#led').children().each(function () {
+			setBit(bitCount,bitCount<updatedLedCount);
+			bitCount++;
+		});
+
+		//When user is close to pants location redirect to found pants page.
+		if(updatedLedCount==0){
+			window.location.href="/foundPants"
+		}
+
+	});
+
+	//Request users current location from browser.
+	getLocation();
 
 }
 
+/**
+*Requests user browser for access to location details
+**/ 
 function getLocation() {
 	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(showPosition);
+		navigator.geolocation.getCurrentPosition(useLocation);
 	} else {
 		alert("Geolocation is not supported by this browser.");
 	}
 }
-function showPosition(position) {
-	console.log("Latitude: " + position.coords.latitude + 
-		"Longitude: " + position.coords.longitude); 
+
+/**
+*Returns current base domain i.e if current url is http://localhost:3000/findMyPants
+*function will return http://localhost:3000.
+**/
+function getCurDomain(){
+	var url = window.location.href
+	var arr = url.split("/");
+	var baseDomain = arr[0] + "//" + arr[2];
+	return baseDomain;
+}
+
+/**
+*Called when location is retrieved from browser.
+*emits a update location event to request updated LED config.
+**/
+function useLocation(position) {
+
 	userLocDetails={
-		lon:position.coords.longitude,
+		lng:position.coords.longitude,
 		lat:position.coords.latitude,
-		numLedActive:0
 	};
+
 	socket.emit('updateLocation',userLocDetails);
 }
-	// Display a bit on the LED display
-	function setBit(bit, on) {
-		if (on) {
-			$("#bit" + bit).css("background-color", "Red");		
-		} else {
-			$("#bit" + bit).css("background-color", "LimeGreen");		
-		}
-	}
 
-	// Display a byte on the LED display
-	function displayChar(ch) {
+// Display a bit on the LED display
+function setBit(bit, on) {
+	if (on) {
+		$("#bit" + bit).css("background-color", "Red");		
+	} else {
+		$("#bit" + bit).css("background-color", "LimeGreen");		
+	}
+}
+
+// Display a byte on the LED display
+function displayChar(ch) {
 		// console.log("Key: " + String.fromCharCode(ch) + "[" + ch + "]");
 		setBit(7, (ch & 0x80) > 0)
 		setBit(6, (ch & 0x40) > 0)
@@ -131,34 +163,17 @@ function showPosition(position) {
 		setBit(0, (ch & 0x01) > 0)
 	}
 
-	// Clears the display back to grey
-	function clearDisplay() {
-		$(".bitbtn").css("background-color", "LightGray");		
-	}
+// Clears the display back to grey
+function clearDisplay() {
+	$(".bitbtn").css("background-color", "LightGray");		
+}
 
-	// Animate the string into the LED display
-	$("#go").click(function() {
 
-		var pos = 0;
-		var msg = $("#keyboard").val();
-		clearDisplay();
-		if (msg.length == 0) return;
-		var interval = setInterval(function() {
-			var ch = msg.charCodeAt(pos);
-			if (pos++ >= msg.length) {
-				clearInterval(interval);
-				clearDisplay();
-			} else {
-				displayChar(ch);
-			}
-		}, 1000)
-
-		return false;
-	});
-
-})
-
-var map;
+/**
+*Initialize google map.
+*NOTE: as our map is placed within a dynamic element it will need to be
+*reinitialized when element becomes visible as has been done above.
+**/
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: -34.397, lng: 150.644},

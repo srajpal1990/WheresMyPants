@@ -5,28 +5,27 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+//Set up routes to pages
 var routes = require('./routes/index');
-var users = require('./routes/users');
 var findMyPants= require('./routes/findMyPants');
 var foundPants= require('./routes/foundPants');
 
 var app = express();
 
-// view engine setup
+// view engine setup (Replaced original jade engine to use HTML)
 app.engine('html', require('ejs').renderFile);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//pass routes to app
 app.use('/', routes);
-app.use('/users', users);
 app.use('/findMyPants',findMyPants);
 app.use('/foundPants',foundPants);
 

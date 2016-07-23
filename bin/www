@@ -9,97 +9,142 @@
  var http = require('http');
  var mongo=require('mongodb');
 
+ /**
+ *Set Up Constants
+ */
  var COLLECTION_NAME="userSockets";
+ var MONGODB_URI=process.env.MONGODB_URI||"mongodb://localhost/mysticpants";
+ var LED_COUNT=8;
 
 /**
  * Get port from environment and store in Express.
  */
-
  var port = normalizePort(process.env.PORT || '3000');
  app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
  var server = http.createServer(app);
  var io=require('socket.io')(server);
+
 /**
  * Listen on provided port, on all network interfaces.
  */
-
  server.listen(port);
  server.on('error', onError);
  server.on('listening', onListening);
- io.on('connection', function (socket){
+
+/**
+*Initialize data and set up event listeners on socket connection event.
+*/
+io.on('connection', function (socket){
+
   console.log("a user connected");
-  
-console.log("mongo uri is "+process.env.MONGODB_URI);
-  mongo.connect(process.env.MONGODB_URI, function (err, db) {
+  insertNewUser(socket);
+  initializeEventListeners(socket);
+
+});
+
+/**
+*Create a new user document in database.
+**/
+function insertNewUser(socket){
+
+  //connect to mongo database.
+  mongo.connect(MONGODB_URI, function (err, db) {
+
     if(err){
+
       console.warn(err.message);
+
     } else {
+
       var usersCollection = db.collection(COLLECTION_NAME);
-
       console.log("inserting user");
-      usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null}, function (err, o) {
-        if (err) { console.warn(err.message); }
-        
 
-      });
+      //Initialized location attribute as null until location retrieved from user.
+      usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null},
+        function (err, o) {
+          if (err) {
+            console.warn(err.message); 
+          }
+        });
     }
   });
-  socket.on('disconnect',function(){
+}
+
+/**
+*Set listeners for location update event and disconnect event
+**/
+initializeEventListeners(socket){
+
+  /**
+  *trigger event: Socket connection is closed
+  *function: Remove User from database on disconnection
+  **/
+  socket.on('disconnect',removeUser()function(){
     console.log("user disconnected");
-    mongo.connect(process.env.MONGODB_URI, function (err, db) {
+    mongo.connect(MONGODB_URI, function (err, db) {
       var usersCollection = db.collection(COLLECTION_NAME);
       usersCollection.remove({socketId:socket.id});
     });
   });
 
+  /**
+  *trigger event: User location updated
+  *function: Process new location and return updated LED configuration
+  **/
   socket.on('updateLocation',function(locDetails){
     console.log("update location event");
-    mongo.connect(process.env.MONGODB_URI, function (err, db) {
+
+    mongo.connect(MONGODB_URI, function (err, db) {
       if(err){
         console.warn(err.message);
       } else {
         var usersCollection = db.collection(COLLECTION_NAME);
+        //get current user based on socket ID
         var user=usersCollection.findOne({socketId:socket.id},function(err,user){
           if(err){
             console.warn(err.message);
           }else{
+            //If pants have not been hidden hide them.
             if(user.pantsLat==null||user.pantsLon==null||user.origDist==null){
               hidePants(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
             }else{
-              if(user==null){
-                console.log("user was null");
-              }else{
-                console.log("user not null");
-              }
-              updateLed(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
-            }
+            //else calc update LED config
+            updateLed(locDetails.lon,locDetails.lat,locDetails.numLedActive,user,socket);
           }
-        });
+        }
+      });
         
       }
     });
 
   });
+}
 
-
-});
-
+/**
+*Random generates longitude and latitude to hide pants close to the users current position.
+**/
 function hidePants(lon,lat,numLedActive,user,socket){
 
+/**
+*Math.random/100 generates a random float between 0.001-0.009 which is aprox 1km in degrees,
+*thus placing pants at an aprox 1 km radius from the users location
+**/
   var pantsLon=lon+Math.random()/100;
   var pantsLat=lat+Math.random()/100;
   var pantLocation={
     lat:pantsLat,
     lng:pantsLon
   };
+  //emit pants location to pass pant location to front end for cheating
   socket.emit("pantLoc",pantLocation);
+
+  //calc the distance between user and pants location and store pant loc+distance to db
   calcDist(pantsLat,pantsLon,lat,lon,function(dist){
-    mongo.connect(process.env.MONGODB_URI, function (err, db) {
+    mongo.connect(MONGODB_URI, function (err, db) {
       if(err){
         console.warn(err.message);
       } else {
@@ -111,11 +156,12 @@ function hidePants(lon,lat,numLedActive,user,socket){
         usersCollection.save(user,function(err,userDoc){
           if(err){
             console.warn(err.message);
-          }else{
-            console.log("user updated");
           }
         });
-        socket.emit('updateLed',4);
+
+        //set the user current position at the half way position 
+        //(There are 8 LED's therefore turn on 4)
+        socket.emit('updateLed',LED_COUNT/2);
       }
     });
   });
@@ -123,43 +169,22 @@ function hidePants(lon,lat,numLedActive,user,socket){
 
 }
 
-function calcDist(lat1,lon1,lat2,lon2,callback){
-
-
-var R = 6371; // km 
-//has a problem with the .toRad() method below.
-var x1 = lat2-lat1;
-var dLat = toRad(x1);
-var x2 = lon2-lon1;
-var dLon = toRad(x2);
-var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
-Math.sin(dLon/2) * Math.sin(dLon/2);  
-var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-var d = R * c; 
-
-callback(d);
-}
-
-function toRad(Value) {
-  /** Converts numeric degrees to radians */
-  return Value * Math.PI / 180;
-}
-
+/**
+*Calculates and compares users current distance to pants to 
+*starting point and updates led config accordingly.
+**/
 function updateLed(lon,lat,numLedActive,user,socket){
   var origDist=user.origDist;
-  console.log("orig dist "+origDist);
   calcDist(lat,lon,user.pantsLat,user.pantsLon,function(dist){
     var newDist=dist;
     var updatedLedCount=Math.round((newDist/origDist)*4);
-    console.log("new dist "+newDist+" orig dist "+origDist);
-    console.log(updatedLedCount);
-    socket.emit('updateLed',updatedLedCount);
+    socket.emit('updateLed',updatedLedCount);//emit new LED config
   });
 }
+
 /**
  * Normalize a port into a number, string, or false.
  */
-
  function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -177,10 +202,9 @@ function updateLed(lon,lat,numLedActive,user,socket){
 }
 
 /**
- * Event listener for HTTP server "error" event.
- */
-
- function onError(error) {
+* Event listener for HTTP server "error" event.
+*/
+function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -205,13 +229,38 @@ function updateLed(lon,lat,numLedActive,user,socket){
 }
 
 /**
- * Event listener for HTTP server "listening" event.
- */
-
- function onListening() {
+* Event listener for HTTP server "listening" event.
+*/
+function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
   ? 'pipe ' + addr
   : 'port ' + addr.port;
   console.log('Listening on ' + bind);
+}
+
+/**
+*Calculates the distance in KM between to coordinate pairs. The Alogorithm used
+*is called the haversine alorithm.
+**/
+function calcDist(lat1,lon1,lat2,lon2,callback){
+
+var R = 6371; // km 
+var x1 = lat2-lat1;
+var dLat = toRad(x1);
+var x2 = lon2-lon1;
+var dLon = toRad(x2);
+var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+Math.sin(dLon/2) * Math.sin(dLon/2);  
+var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+var d = R * c; 
+
+callback(d);
+}
+
+/** 
+*Converts numeric degrees to radians 
+**/
+function toRad(Value) {
+  return Value * Math.PI / 180;
 }
