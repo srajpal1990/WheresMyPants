@@ -14,8 +14,10 @@ var mongo=require('mongodb');//Mongodb module src:https://www.mongodb.com/
  		if(err){
  			console.warn(err.message);
  		}else{
+ 			console.log("test1");
  			var usersCollection = db.collection(COLLECTION_NAME);
  			usersCollection.findOne({},function(err,user){
+ 			console.log("test2");
 
  				if(err){
  					console.warn(err.message);
