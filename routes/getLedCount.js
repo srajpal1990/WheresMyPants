@@ -23,7 +23,7 @@ var mongo=require('mongodb');//Mongodb module src:https://www.mongodb.com/
  					console.warn(err.message);
  				}else{
  					console.log("int num of led active "+user.numLedActive);
- 					if(user==null||user.numLedActive==null){
+ 					if(user===null||user.numLedActive===null){
  						res.end("-1");
  					}else{
  						console.log(user.numLedActive.toString());
