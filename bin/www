@@ -7,7 +7,7 @@
  var app = require('../app');
  var debug = require('debug')('WheresMyPants:server');
  var http = require('http');
- var mongo=require('mongodb');
+ var mongo=require('mongodb');//Mongodb module src:https://www.mongodb.com/
 
  /**
  *Set Up Constants
@@ -26,7 +26,7 @@
  * Create HTTP server.
  */
  var server = http.createServer(app);
- var io=require('socket.io')(server);
+ var io=require('socket.io')(server);//Socket.io module src:http://socket.io/
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -64,7 +64,7 @@ function insertNewUser(socket){
       console.log("inserting user");
 
       //Initialized location attribute as null until location retrieved from user.
-      usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null},
+      usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null,numLedActive:null},
         function (err, o) {
           if (err) {
             console.warn(err.message); 
@@ -87,7 +87,7 @@ function initializeEventListeners(socket){
     console.log("user disconnected");
     mongo.connect(MONGODB_URI, function (err, db) {
       var usersCollection = db.collection(COLLECTION_NAME);
-      usersCollection.remove({socketId:socket.id});
+      usersCollection.remove({});
     });
   });
 
@@ -133,12 +133,12 @@ function hidePants(lon,lat,numLedActive,user,socket){
 *Math.random/100 generates a random float between 0.001-0.009 which is aprox 1km in degrees,
 *thus placing pants at an aprox 1 km radius from the users location
 **/
-  var pantsLon=lon+Math.random()/100;
-  var pantsLat=lat+Math.random()/100;
-  var pantLocation={
-    lat:pantsLat,
-    lng:pantsLon
-  };
+var pantsLon=lon+Math.random()/100;
+var pantsLat=lat+Math.random()/100;
+var pantLocation={
+  lat:pantsLat,
+  lng:pantsLon
+};
   //emit pants location to pass pant location to front end for cheating
   socket.emit("pantLoc",pantLocation);
 
@@ -152,6 +152,7 @@ function hidePants(lon,lat,numLedActive,user,socket){
         user.pantsLat=pantsLat;
         user.pantsLon=pantsLon;
         user.origDist=dist;
+        user.numLedActive=LED_COUNT/2;
         console.log(user);
         usersCollection.save(user,function(err,userDoc){
           if(err){
@@ -161,7 +162,7 @@ function hidePants(lon,lat,numLedActive,user,socket){
 
         //set the user current position at the half way position 
         //(There are 8 LED's therefore turn on 4)
-        socket.emit('updateLed',LED_COUNT/2);
+        socket.emit('updateLed',user.numLedActive);
       }
     });
   });
@@ -178,6 +179,20 @@ function updateLed(lon,lat,numLedActive,user,socket){
   calcDist(lat,lon,user.pantsLat,user.pantsLon,function(dist){
     var newDist=dist;
     var updatedLedCount=Math.round((newDist/origDist)*4);
+    mongo.connect(MONGODB_URI, function (err, db) {
+      if(err){
+        console.warn(err.message);
+      } else {
+        var usersCollection = db.collection(COLLECTION_NAME);
+        user.numLedActive=updatedLedCount;
+        console.log("updating users led count to "+updatedLedCount);
+        usersCollection.save(user,function(err,userDoc){
+          if(err){
+            console.warn(err.message);
+          }
+        });
+      }
+    });
     socket.emit('updateLed',updatedLedCount);//emit new LED config
   });
 }

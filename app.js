@@ -1,4 +1,4 @@
-var express = require('express');
+var express = require('express');//Express module src:https://expressjs.com/
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var findMyPants= require('./routes/findMyPants');
 var foundPants= require('./routes/foundPants');
+var getLedCount= require('./routes/getLedCount');
 
 var app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/findMyPants',findMyPants);
 app.use('/foundPants',foundPants);
+app.use('/getLedCount',getLedCount);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
