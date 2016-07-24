@@ -138,8 +138,8 @@ var pantsLat=lat+Math.random()/100;
 var pantLocation={
   lat:pantsLat,
   lng:pantsLon
-};
-  //emit pants location to pass pant location to front end for cheating
+}; 
+  //emit the pants location to pass pant location to front end for cheating
   socket.emit("pantLoc",pantLocation);
 
   //calc the distance between user and pants location and store pant loc+distance to db
