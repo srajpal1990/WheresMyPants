@@ -62,12 +62,13 @@ function insertNewUser(socket){
 
       var usersCollection = db.collection(COLLECTION_NAME);
       console.log("inserting user");
+      usersCollection.remove({});
 
       //Initialized location attribute as null until location retrieved from user.
       usersCollection.insert({socketId:socket.id,pantsLat:null,pantsLon:null,origDist:null,numLedActive:null},
         function (err, o) {
           if (err) {
-            console.warn(err.message); 
+            console.warn(err.message);
           }
         });
     }
