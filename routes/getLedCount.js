@@ -8,24 +8,24 @@ var mongo=require('mongodb');//Mongodb module src:https://www.mongodb.com/
  var COLLECTION_NAME="userSockets";
  var MONGODB_URI=process.env.MONGODB_URI||"mongodb://localhost/mysticpants";
 
- /* GET home page. */
+ /* Simple API method (/getLedCount) to intercept request for current LED count, 
+ *retrieve current users LED config and display on page */
  router.get('/', function(req, res, next) {
  	mongo.connect(MONGODB_URI, function (err, db) {
  		if(err){
  			console.warn(err.message);
  		}else{
- 			console.log("test1");
+ 			//Fnd the current user
  			var usersCollection = db.collection(COLLECTION_NAME);
  			usersCollection.findOne({},function(err,user){
- 			console.log("test2");
-
  				if(err){
  					console.warn(err.message);
  				}else{
+ 					//case where no users exist means no user is connected so return -1
  					if(user===null||user.numLedActive===null){
  						res.end("-1"); 
  					}else{
- 						console.log(user.numLedActive.toString());
+ 						//respond with current active led lights
  						res.end(user.numLedActive.toString());
  					}
  				}
